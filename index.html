@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мое мини-приложение</title>
-    <!-- ПРАВИЛЬНОЕ подключение VK Bridge -->
+    <title>Вступить в чат</title>
+    <!-- Подключаем VK Bridge -->
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <style>
         * {
@@ -14,136 +14,273 @@
         }
         
         body {
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            padding: 20px;
         }
         
         .container {
             text-align: center;
-            padding: 20px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
         }
         
         .chat-button {
-            background: #07f;
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
             color: white;
             border: none;
-            border-radius: 10px;
-            padding: 15px 30px;
-            font-size: 16px;
-            font-weight: 500;
+            border-radius: 12px;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(75, 108, 183, 0.3);
         }
         
         .chat-button:hover {
-            background: #0055cc;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(75, 108, 183, 0.4);
+        }
+        
+        .chat-button:active {
+            transform: translateY(0);
         }
         
         .loader {
             display: none;
             margin: 20px auto;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #07f;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4b6cb7;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            background: #ffeaea;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .chat-button {
+                padding: 16px 30px;
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="logo">💬</div>
+        <h1>Присоединяйтесь к нашему чату</h1>
+        <p class="description">
+            Общайтесь с участниками, задавайте вопросы и будьте в курсе всех новостей в нашем уютном чате ВКонтакте
+        </p>
+        
         <button id="chatButton" class="chat-button">
-            💬 Перейти в чат
+            <span>💬</span>
+            <span>Вступить в чат</span>
         </button>
+        
         <div id="loader" class="loader"></div>
+        
+        <div id="errorMessage" class="error-message">
+            Не удалось открыть чат. Пожалуйста, попробуйте еще раз или перейдите по ссылке вручную.
+        </div>
     </div>
 
     <script>
-        // Ждем загрузки VK Bridge
+        // Ваша ссылка на вступление в чат
+        const CHAT_INVITE_LINK = 'https://vk.me/join/AZQ1d2ZgwwIo3gu/vq5WuaCY';
+        
+        // Ждем загрузки DOM
         document.addEventListener('DOMContentLoaded', function() {
-            showLoader(false); // Скрываем лоадер
+            const button = document.getElementById('chatButton');
+            const loader = document.getElementById('loader');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Прячем лоадер и ошибку при загрузке
+            hideLoader();
+            hideError();
             
             // Проверяем, загружен ли VK Bridge
             if (typeof vkBridge === 'undefined') {
-                console.error('VK Bridge не загружен!');
-                showError();
-                return;
+                console.warn('VK Bridge не загружен, используется fallback режим');
+                setupFallback();
+            } else {
+                // Инициализируем приложение через VK Bridge
+                initVKApp();
             }
             
-            // Инициализируем приложение
-            vkBridge.send('VKWebAppInit', {})
-                .then(() => {
-                    console.log('Приложение инициализировано');
-                    setupChatButton();
-                })
-                .catch((error) => {
-                    console.error('Ошибка инициализации:', error);
-                    setupChatButton(); // Все равно показываем кнопку
-                });
-        });
-        
-        function setupChatButton() {
-            const button = document.getElementById('chatButton');
-            const loader = document.getElementById('loader');
-            
+            // Настраиваем кнопку
             button.addEventListener('click', function() {
-                showLoader(true);
-                
-                // Открываем чат (замените на ваш chat_id)
-                vkBridge.send('VKWebAppOpenURL', {
-                    url: 'https://vk.me/join/AZQ1d2ZgwwIo3gu/vq5WuaCY' // Замените YOUR_CHAT_ID
-                })
-                .then(() => {
-                    showLoader(false);
-                })
-                .catch((error) => {
-                    console.error('Ошибка открытия чата:', error);
-                    showLoader(false);
-                    
-                    // Fallback: открываем в новой вкладке
-                    window.open('https://vk.me/join/AZQ1d2ZgwwIo3gu/vq5WuaCY', '_blank');
-                });
+                openChat();
             });
             
-            // Показываем кнопку
-            button.style.display = 'block';
-            showLoader(false);
-        }
-        
-        function showLoader(show) {
-            const loader = document.getElementById('loader');
-            const button = document.getElementById('chatButton');
-            
-            if (show) {
-                loader.style.display = 'block';
-                button.style.display = 'none';
-            } else {
-                loader.style.display = 'none';
-                button.style.display = 'block';
+            // Функция открытия чата
+            function openChat() {
+                showLoader();
+                hideError();
+                
+                if (typeof vkBridge !== 'undefined' && vkBridge.isWebView()) {
+                    // В мобильном приложении VK
+                    vkBridge.send('VKWebAppOpenURL', {
+                        url: CHAT_INVITE_LINK,
+                        target: '_blank'
+                    })
+                    .then(() => {
+                        hideLoader();
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при открытии ссылки через VKWebAppOpenURL:', error);
+                        openLinkInNewWindow();
+                    });
+                } else {
+                    // В браузере или если VK Bridge недоступен
+                    openLinkInNewWindow();
+                }
             }
-        }
-        
-        function showError() {
-            const container = document.querySelector('.container');
-            container.innerHTML = `
-                <div style="color: #ff3333; padding: 20px;">
-                    <p>Ошибка загрузки приложения</p>
-                    <button onclick="location.reload()" class="chat-button">
-                        Обновить
-                    </button>
-                </div>
-            `;
-        }
+            
+            // Функция открытия ссылки в новом окне
+            function openLinkInNewWindow() {
+                window.open(CHAT_INVITE_LINK, '_blank');
+                hideLoader();
+                
+                // Проверяем, открылось ли окно (защита от блокировщиков всплывающих окон)
+                setTimeout(() => {
+                    // Если ссылка, возможно, заблокирована, показываем ошибку
+                    const isBlocked = window.closed === undefined ? false : window.closed;
+                    if (isBlocked) {
+                        showError();
+                        // Альтернативный вариант: предлагаем скопировать ссылку
+                        copyToClipboard();
+                    }
+                }, 1000);
+            }
+            
+            // Инициализация VK приложения
+            function initVKApp() {
+                vkBridge.send('VKWebAppInit', {})
+                    .then(() => {
+                        console.log('VK Mini App инициализирован');
+                        // Можем получить информацию о пользователе
+                        return vkBridge.send('VKWebAppGetUserInfo', {});
+                    })
+                    .then(userInfo => {
+                        console.log('Информация о пользователе:', userInfo);
+                        // Можно персонализировать приветствие
+                        if (userInfo && userInfo.first_name) {
+                            const description = document.querySelector('.description');
+                            description.textContent = `Привет, ${userInfo.first_name}! Присоединяйтесь к нашему чату для общения с другими участниками.`;
+                        }
+                    })
+                    .catch(error => {
+                        console.log('Приложение работает в fallback режиме:', error);
+                    });
+            }
+            
+            // Fallback режим (если VK Bridge не загрузился)
+            function setupFallback() {
+                console.log('Используется fallback режим');
+            }
+            
+            // Вспомогательные функции
+            function showLoader() {
+                button.style.display = 'none';
+                loader.style.display = 'block';
+            }
+            
+            function hideLoader() {
+                button.style.display = 'inline-flex';
+                loader.style.display = 'none';
+            }
+            
+            function showError() {
+                errorMessage.style.display = 'block';
+            }
+            
+            function hideError() {
+                errorMessage.style.display = 'none';
+            }
+            
+            // Функция копирования ссылки в буфер обмена (как fallback)
+            function copyToClipboard() {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(CHAT_INVITE_LINK)
+                        .then(() => {
+                            alert('Ссылка скопирована в буфер обмена! Вставьте ее в адресную строку браузера.');
+                        })
+                        .catch(err => {
+                            console.error('Ошибка при копировании:', err);
+                            // Альтернативный метод
+                            const textArea = document.createElement('textarea');
+                            textArea.value = CHAT_INVITE_LINK;
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(textArea);
+                            alert('Ссылка скопирована в буфер обмена! Вставьте ее в браузер.');
+                        });
+                }
+            }
+        });
     </script>
 </body>
 </html>
