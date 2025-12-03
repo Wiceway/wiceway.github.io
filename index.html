@@ -2,7 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Чат ВК "Культурный Движ"</title>
+    <title>Чат Культурный Движ</title>
+    <script src="unpkg.com"></script>
     <style>
         body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .vk-button { padding: 10px 20px; font-size: 16px; background-color: #4a76a8; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; }
@@ -11,7 +12,15 @@
 <body>
     <!-- Замените "https://example.com" на нужную вам ссылку -->
     <a href="https://vk.me/join/AZQ1d2ZgwwIo3gu/vq5WuaCY" target="_blank" class="vk-button">
-        Вступить в чат
+        Перейти на сайт
     </a>
+
+    <script>
+        // Инициализация VK Bridge
+        vkBridge.send('VKWebAppInit');
+        
+        // Опционально: можно скрыть лоадер вручную, хотя VKWebAppInit должен сделать это автоматически
+        // vkBridge.send('VKWebAppSetLocation', { location: 'home' }); 
+    </script>
 </body>
 </html>
