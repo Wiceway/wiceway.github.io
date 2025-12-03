@@ -3,224 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вступить в чат</title>
-    <!-- Подключаем VK Bridge -->
+    <title>Культурный Движ | ВКонтакте</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
-            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            background: #0d0d0d; /* Абсолютно чёрный для контраста и глубины */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             padding: 20px;
+            color: #f0f0f0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
         .container {
             text-align: center;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            max-width: 400px;
             width: 100%;
+            max-width: 340px;
+            animation: subtleAppear 0.8s ease-out;
         }
         
         .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
-            border-radius: 50%;
-            margin: 0 auto 20px;
+            margin-bottom: 60px;
+        }
+        
+        .logo-main {
+            font-size: 40px; /* Увеличил для уверенности */
+            font-weight: 900; /* Максимальная жирность */
+            color: #ffffff;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+            line-height: 1;
+            text-shadow: 0 2px 10px rgba(0, 119, 255, 0.15);
+        }
+        
+        .logo-subtitle {
+            font-size: 13px;
+            color: #0077FF; /* Синий VK для связи */
+            font-weight: 600;
+            letter-spacing: 3px; /* Шире = статуснее */
+            text-transform: uppercase;
+            margin-top: 12px;
+            opacity: 0.9;
+        }
+        
+        .action-button {
+            background: linear-gradient(135deg, #0077FF 0%, #0055EE 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 16px; /* Чуть скруглённее для "премиум" */
+            padding: 26px 0; /* Ещё больше, весомее */
+            font-size: 21px;
+            font-weight: 800; /* Очень жирный текст на кнопке */
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: block;
+            width: 100%;
+            text-decoration: none;
+            position: relative;
+            margin-bottom: 40px;
+            box-shadow: 0 12px 32px rgba(0, 119, 255, 0.4);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Эффект "сияния" для королевского ощущения */
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                #0077FF, 
+                #00D1FF, 
+                #0077FF, 
+                #0055EE);
+            border-radius: 18px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .action-button:hover::before,
+        .action-button:focus::before {
+            opacity: 1;
+            animation: rotateGradient 3s linear infinite;
+        }
+        
+        .action-button:hover,
+        .action-button:focus {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 18px 42px rgba(0, 119, 255, 0.5);
+        }
+        
+        .action-button:active {
+            transform: translateY(-1px) scale(0.995);
+            transition-duration: 0.1s;
+        }
+        
+        .button-text {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
-            color: white;
+            gap: 14px;
+            z-index: 2; /* Чтобы текст был над градиентом */
         }
         
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
+        .button-icon {
             font-size: 24px;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
         }
         
-        .description {
-            color: #666;
-            margin-bottom: 30px;
-            line-height: 1.5;
+        .trust-note {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.6;
+            font-weight: 400;
+            margin-top: 24px;
+            padding: 0 10px;
+            font-style: italic;
         }
         
-        /* ОСНОВНОЕ ИЗМЕНЕНИЕ: Теперь это стиль для ссылки <a>, а не кнопки */
-        .chat-button {
-            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 18px 40px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            box-shadow: 0 4px 15px rgba(75, 108, 183, 0.3);
-            text-decoration: none; /* Убираем подчеркивание у ссылки */
-            
-            /* Критически важные свойства для работы на iOS в приложении ВК */
-            position: relative;
-            z-index: 1000;
-            -webkit-tap-highlight-color: transparent; /* Убираем серый фон при нажатии на iOS */
+        .trust-note strong {
+            color: #ffffff;
+            font-weight: 500;
+            background: linear-gradient(90deg, #0077FF, #00D1FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        .chat-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(75, 108, 183, 0.4);
+        @keyframes subtleAppear {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .chat-button:active {
-            transform: translateY(0);
+        @keyframes rotateGradient {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
         }
         
-        .loader {
-            display: none;
-            margin: 20px auto;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4b6cb7;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        
-        .error-message {
-            color: #e74c3c;
-            background: #ffeaea;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            display: none;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @media (max-width: 480px) {
+        @media (max-width: 360px) {
             .container {
-                padding: 30px 20px;
+                padding: 10px;
             }
-            
-            h1 {
+            .logo-main {
+                font-size: 36px;
+            }
+            .action-button {
+                padding: 24px 0;
                 font-size: 20px;
-            }
-            
-            .chat-button {
-                padding: 16px 30px;
-                font-size: 16px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">💬</div>
-        <h1>Присоединяйтесь к нашему чату</h1>
-        <p class="description">
-            Общайтесь с участниками, задавайте вопросы и будьте в курсе всех новостей в нашем уютном чате ВКонтакте
-        </p>
+        <div class="logo">
+            <div class="logo-main">КУЛЬТУРНЫЙ<br>ДВИЖ</div>
+            <div class="logo-subtitle">Эксклюзивный круг VK</div>
+        </div>
         
-        <!-- ОСНОВНОЕ ИЗМЕНЕНИЕ: Заменили <button> на ссылку <a> -->
-        <!-- Атрибут target="_blank" гарантирует открытие в новом окне/вкладке -->
-        <a id="chatButton" class="chat-button" href="https://vk.me/join/AZQ1d2ZgwwIo3gu/vq5WuaCY" target="_blank">
-            <span>💬</span>
-            <span>Вступить в чат</span>
+        <a id="joinButton" class="action-button" 
+           href="https://vk.me/join/AZQ1d2ZgwwIo3gu/vq5WuaCY" 
+           target="_blank"
+           aria-label="Войти в закрытый круг Культурного Движа">
+            <span class="button-text">
+                <span class="button-icon">👑</span> <!-- Корона вместо алмаза -->
+                <span>ОТКРЫТЬ ЧАТ</span>
+            </span>
         </a>
         
-        <div id="loader" class="loader"></div>
-        
-        <div id="errorMessage" class="error-message">
-            Не удалось открыть чат. Пожалуйста, попробуйте еще раз или перейдите по ссылке вручную.
-        </div>
+        <p class="trust-note">
+            Ваше приглашение <strong>активно</strong>. <br>
+            Чат откроется в приложении.
+        </p>
     </div>
 
     <script>
-        // Ваша ссылка на вступление в чат
-        const CHAT_INVITE_LINK = 'https://vk.me/join/AZQ1d2ZgwwIo3gu/vq5WuaCY';
-        
-        // Ждем загрузки DOM
         document.addEventListener('DOMContentLoaded', function() {
-            const button = document.getElementById('chatButton');
-            const loader = document.getElementById('loader');
-            const errorMessage = document.getElementById('errorMessage');
+            const button = document.getElementById('joinButton');
             
-            // Прячем лоадер и ошибку при загрузке
-            hideLoader();
-            hideError();
-            
-            // Инициализируем VK Bridge для аналитики или других функций
+            // Инициализация VK Mini App
             if (typeof vkBridge !== 'undefined') {
                 vkBridge.send('VKWebAppInit', {})
                     .then(() => {
-                        console.log('VK Mini App инициализирован');
-                        // Можем получить информацию о пользователе
-                        return vkBridge.send('VKWebAppGetUserInfo', {});
+                        console.log('✅ VK Mini App инициализирован');
+                        // Отправляем событие для аналитики
+                        vkBridge.send('VKWebAppTrackEvent', {
+                            event_name: 'premium_page_view',
+                            event_data: { page: 'main' }
+                        }).catch(() => {});
                     })
-                    .then(userInfo => {
-                        console.log('Информация о пользователе:', userInfo);
-                        // Можно персонализировать приветствие
-                        if (userInfo && userInfo.first_name) {
-                            const description = document.querySelector('.description');
-                            description.textContent = `Привет, ${userInfo.first_name}! Присоединяйтесь к нашему чату для общения с другими участниками.`;
-                        }
-                    })
-                    .catch(error => {
-                        console.log('Приложение работает в fallback режиме:', error);
-                    });
+                    .catch(() => {});
             }
             
-            // Дополнительный обработчик для ссылки для аналитики
-            button.addEventListener('click', function(event) {
-                console.log('Кнопка "Вступить в чат" была нажата');
-                
-                // Если нужно добавить аналитику или дополнительную логику
-                // Это не помешает переходу по ссылке, так как не вызываем event.preventDefault()
-                
-                // Можно добавить небольшую задержку для отслеживания (необязательно)
-                setTimeout(function() {
-                    // Любая дополнительная логика
-                }, 100);
+            // Усиленная тактильная обратная связь
+            button.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.99)';
+            }, { passive: true });
+            
+            button.addEventListener('touchend', function() {
+                this.style.transform = '';
+            }, { passive: true });
+            
+            // Логирование "королевского" клика
+            button.addEventListener('click', function() {
+                console.log('👑 Королевский клик на кнопку доступа');
+                if (typeof vkBridge !== 'undefined') {
+                    vkBridge.send('VKWebAppTrackEvent', {
+                        event_name: 'access_requested',
+                        event_data: { timestamp: Date.now() }
+                    }).catch(() => {});
+                }
+                // Микро-анимация "вспышки" при клике (опционально)
+                this.style.boxShadow = '0 0 30px rgba(0, 119, 255, 0.7)';
+                setTimeout(() => {
+                    this.style.boxShadow = '';
+                }, 150);
             });
-            
-            // Вспомогательные функции
-            function showLoader() {
-                button.style.display = 'none';
-                loader.style.display = 'block';
-            }
-            
-            function hideLoader() {
-                button.style.display = 'inline-flex';
-                loader.style.display = 'none';
-            }
-            
-            function showError() {
-                errorMessage.style.display = 'block';
-            }
-            
-            function hideError() {
-                errorMessage.style.display = 'none';
-            }
         });
     </script>
 </body>
