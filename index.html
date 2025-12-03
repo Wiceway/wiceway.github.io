@@ -3,27 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Чат Культурный Движ</title>
+    <!-- Подключаем VK Bridge в самом начале -->
     <script src="unpkg.com"></script>
+    <script>
+        // Инициализируем приложение сразу после загрузки скрипта
+        vkBridge.send('VKWebAppInit').then(res => {
+            // Логгируем успех, если нужно отлаживать
+            console.log('VKWebAppInit success:', res);
+        }).catch(err => {
+            // Логгируем ошибку, если инициализация не удалась
+            console.error('VKWebAppInit error:', err);
+        });
+    </script>
     <style>
         body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .vk-button { padding: 10px 20px; font-size: 16px; background-color: #4a76a8; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; }
     </style>
 </head>
 <body>
-    <!-- Замените "https://example.com" на нужную вам ссылку -->
     <a href="https://vk.me/join/AZQ1d2ZgwwIo3gu/vq5WuaCY" target="_blank" class="vk-button">
         Вступить в чат
     </a>
-
-    <script>
-        // Инициализация VK Bridge
-        vkBridge.send('VKWebAppInit');
-        
-        // Опционально: можно скрыть лоадер вручную, хотя VKWebAppInit должен сделать это автоматически
-        vkBridge.send('VKWebAppSetLocation', { location: 'home' }); 
-
-        // Дополнительный вызов для гарантированного скрытия лоадера и получения данных
-        vkBridge.send('VKWebAppGetConfig'); 
-    </script>
 </body>
 </html>
