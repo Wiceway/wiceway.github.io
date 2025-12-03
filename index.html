@@ -58,6 +58,7 @@
             line-height: 1.5;
         }
         
+        /* ОСНОВНОЕ ИЗМЕНЕНИЕ: Теперь это стиль для ссылки <a>, а не кнопки */
         .chat-button {
             background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
             color: white;
@@ -74,6 +75,12 @@
             gap: 10px;
             width: 100%;
             box-shadow: 0 4px 15px rgba(75, 108, 183, 0.3);
+            text-decoration: none; /* Убираем подчеркивание у ссылки */
+            
+            /* Критически важные свойства для работы на iOS в приложении ВК */
+            position: relative;
+            z-index: 1000;
+            -webkit-tap-highlight-color: transparent; /* Убираем серый фон при нажатии на iOS */
         }
         
         .chat-button:hover {
@@ -134,10 +141,12 @@
             Общайтесь с участниками, задавайте вопросы и будьте в курсе всех новостей в нашем уютном чате ВКонтакте
         </p>
         
-        <button id="chatButton" class="chat-button">
+        <!-- ОСНОВНОЕ ИЗМЕНЕНИЕ: Заменили <button> на ссылку <a> -->
+        <!-- Атрибут target="_blank" гарантирует открытие в новом окне/вкладке -->
+        <a id="chatButton" class="chat-button" href="https://vk.me/join/AZQ1d2ZgwwIo3gu/vq5WuaCY" target="_blank">
             <span>💬</span>
             <span>Вступить в чат</span>
-        </button>
+        </a>
         
         <div id="loader" class="loader"></div>
         
@@ -160,63 +169,8 @@
             hideLoader();
             hideError();
             
-            // Проверяем, загружен ли VK Bridge
-            if (typeof vkBridge === 'undefined') {
-                console.warn('VK Bridge не загружен, используется fallback режим');
-                setupFallback();
-            } else {
-                // Инициализируем приложение через VK Bridge
-                initVKApp();
-            }
-            
-            // Настраиваем кнопку
-            button.addEventListener('click', function() {
-                openChat();
-            });
-            
-            // Функция открытия чата
-            function openChat() {
-                showLoader();
-                hideError();
-                
-                if (typeof vkBridge !== 'undefined' && vkBridge.isWebView()) {
-                    // В мобильном приложении VK
-                    vkBridge.send('VKWebAppOpenURL', {
-                        url: CHAT_INVITE_LINK,
-                        target: '_blank'
-                    })
-                    .then(() => {
-                        hideLoader();
-                    })
-                    .catch(error => {
-                        console.error('Ошибка при открытии ссылки через VKWebAppOpenURL:', error);
-                        openLinkInNewWindow();
-                    });
-                } else {
-                    // В браузере или если VK Bridge недоступен
-                    openLinkInNewWindow();
-                }
-            }
-            
-            // Функция открытия ссылки в новом окне
-            function openLinkInNewWindow() {
-                window.open(CHAT_INVITE_LINK, '_blank');
-                hideLoader();
-                
-                // Проверяем, открылось ли окно (защита от блокировщиков всплывающих окон)
-                setTimeout(() => {
-                    // Если ссылка, возможно, заблокирована, показываем ошибку
-                    const isBlocked = window.closed === undefined ? false : window.closed;
-                    if (isBlocked) {
-                        showError();
-                        // Альтернативный вариант: предлагаем скопировать ссылку
-                        copyToClipboard();
-                    }
-                }, 1000);
-            }
-            
-            // Инициализация VK приложения
-            function initVKApp() {
+            // Инициализируем VK Bridge для аналитики или других функций
+            if (typeof vkBridge !== 'undefined') {
                 vkBridge.send('VKWebAppInit', {})
                     .then(() => {
                         console.log('VK Mini App инициализирован');
@@ -236,10 +190,18 @@
                     });
             }
             
-            // Fallback режим (если VK Bridge не загрузился)
-            function setupFallback() {
-                console.log('Используется fallback режим');
-            }
+            // Дополнительный обработчик для ссылки для аналитики
+            button.addEventListener('click', function(event) {
+                console.log('Кнопка "Вступить в чат" была нажата');
+                
+                // Если нужно добавить аналитику или дополнительную логику
+                // Это не помешает переходу по ссылке, так как не вызываем event.preventDefault()
+                
+                // Можно добавить небольшую задержку для отслеживания (необязательно)
+                setTimeout(function() {
+                    // Любая дополнительная логика
+                }, 100);
+            });
             
             // Вспомогательные функции
             function showLoader() {
@@ -258,27 +220,6 @@
             
             function hideError() {
                 errorMessage.style.display = 'none';
-            }
-            
-            // Функция копирования ссылки в буфер обмена (как fallback)
-            function copyToClipboard() {
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(CHAT_INVITE_LINK)
-                        .then(() => {
-                            alert('Ссылка скопирована в буфер обмена! Вставьте ее в адресную строку браузера.');
-                        })
-                        .catch(err => {
-                            console.error('Ошибка при копировании:', err);
-                            // Альтернативный метод
-                            const textArea = document.createElement('textarea');
-                            textArea.value = CHAT_INVITE_LINK;
-                            document.body.appendChild(textArea);
-                            textArea.select();
-                            document.execCommand('copy');
-                            document.body.removeChild(textArea);
-                            alert('Ссылка скопирована в буфер обмена! Вставьте ее в браузер.');
-                        });
-                }
             }
         });
     </script>
