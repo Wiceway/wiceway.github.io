@@ -20,7 +20,10 @@
         vkBridge.send('VKWebAppInit');
         
         // Опционально: можно скрыть лоадер вручную, хотя VKWebAppInit должен сделать это автоматически
-        // vkBridge.send('VKWebAppSetLocation', { location: 'home' }); 
+        vkBridge.send('VKWebAppSetLocation', { location: 'home' }); 
+
+        // Дополнительный вызов для гарантированного скрытия лоадера и получения данных
+        vkBridge.send('VKWebAppGetConfig'); 
     </script>
 </body>
 </html>
